@@ -1,0 +1,31 @@
+import GameContainer from '@/components/Game/GameContainer';
+import { getPreguntasByMarcaBayer } from '@/models/Juego';
+
+export default async function GamePage({
+    params,
+    searchParams
+}: {
+    params: Promise<{ paisId: string; marcaBayerId: string }>;
+    searchParams: Promise<{ participantes?: string }>;
+}) {
+    const { paisId: paisIdStr, marcaBayerId: marcaBayerIdStr } = await params;
+    const { participantes } = await searchParams;
+
+    const paisId = parseInt(paisIdStr);
+    const marcaBayerId = parseInt(marcaBayerIdStr);
+    const totalParticipants = participantes ? parseInt(participantes) : 1;
+
+    // Fetch questions server-side
+    const preguntas = await getPreguntasByMarcaBayer(paisId, marcaBayerId);
+
+    return (
+        <div className="w-full min-h-screen flex flex-col items-center justify-center py-8">
+            <GameContainer
+                preguntas={preguntas}
+                paisId={paisIdStr}
+                marcaBayerId={marcaBayerIdStr}
+                totalParticipants={totalParticipants}
+            />
+        </div>
+    );
+}
