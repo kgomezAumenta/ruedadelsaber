@@ -21,9 +21,9 @@ export async function middleware(request: NextRequest) {
     // Check token
     if (!token) {
         // Redirect to login if trying to access protected route
-        // But we need to know where to redirect. 
-        // For admin: /login (but we don't have a global login, maybe just redirect to root)
-        // For game: redirect to brand login page if possible, or root.
+        if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/admin')) {
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
         return NextResponse.redirect(new URL('/', request.url));
     }
 
@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
         // Admin routes protection
         if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/admin')) {
             if (role !== 'admin') {
-                return NextResponse.redirect(new URL('/', request.url));
+                return NextResponse.redirect(new URL('/login', request.url));
             }
         }
 
