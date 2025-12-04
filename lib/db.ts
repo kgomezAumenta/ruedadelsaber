@@ -11,12 +11,21 @@ const dbConfig = {
   queueLimit: 0,
 };
 
+// Debug log (will show in Vercel build logs)
+console.log('Initializing DB connection...');
+console.log('Original DB_HOST:', dbConfig.host);
+
 // Handle host:port format in DB_HOST
 if (dbConfig.host.includes(':')) {
-  const [host, port] = dbConfig.host.split(':');
-  dbConfig.host = host;
-  dbConfig.port = parseInt(port, 10);
+  const parts = dbConfig.host.split(':');
+  dbConfig.host = parts[0].trim();
+  if (parts[1]) {
+    dbConfig.port = parseInt(parts[1].trim(), 10);
+  }
+  console.log('Detected port in host string. Splitting...');
 }
+
+console.log('Final DB Config:', { ...dbConfig, password: '***' });
 
 const pool = mysql.createPool(dbConfig);
 
