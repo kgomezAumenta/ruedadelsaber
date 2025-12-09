@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Pregunta, Respuesta } from '@/models/types';
 import Wheel from './Wheel';
 import QuestionCard from './QuestionCard';
@@ -27,10 +27,6 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
     const [shuffledQuestions, setShuffledQuestions] = useState<Pregunta[]>([]);
 
     // Initialize questions on mount or when participant changes
-    useEffect(() => {
-        shuffleQuestions();
-    }, [currentParticipant]);
-
     const [results, setResults] = useState<{ participant: number; score: number; gano: boolean }[]>([]);
 
     const shuffleQuestions = () => {
@@ -38,6 +34,17 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
         const shuffled = [...preguntas].sort(() => Math.random() - 0.5).slice(0, 3);
         setShuffledQuestions(shuffled);
     };
+
+    // Initialize questions on mount or when participant changes
+    useEffect(() => {
+        shuffleQuestions();
+    }, [currentParticipant]);
+
+    const scoreRef = useRef(0);
+
+    useEffect(() => {
+        scoreRef.current = score;
+    }, [score]);
 
     // Timer logic
     useEffect(() => {
@@ -84,8 +91,9 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
     };
 
     const nextRound = async () => {
+        const currentScore = scoreRef.current;
         if (currentRound >= 3) {
-            const gano = score >= 2;
+            const gano = currentScore >= 2;
 
             // Save results for current participant
             try {
@@ -93,7 +101,7 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        aciertos: score,
+                        aciertos: currentScore,
                         gano,
                         numero_participante: currentParticipant
                     }),
@@ -102,7 +110,7 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
                 console.error(e);
             }
 
-            setResults(prev => [...prev, { participant: currentParticipant, score, gano }]);
+            setResults(prev => [...prev, { participant: currentParticipant, score: currentScore, gano }]);
 
             if (currentParticipant < totalParticipants) {
                 setGameState('NEXT_PARTICIPANT');
@@ -159,14 +167,16 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
             </div>
 
             {/* Header Right - Game Stats */}
-            <div className="absolute top-6 right-6 flex flex-col items-end gap-4 text-white font-bold text-xl z-20">
-                <div className="bg-white/20 px-6 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10">
-                    Ronda {currentRound}/3
+            {gameState !== 'FINISHED' && gameState !== 'NEXT_PARTICIPANT' && (
+                <div className="absolute top-6 right-6 flex flex-col items-end gap-4 text-white font-bold text-xl z-20">
+                    <div className="bg-white/20 px-6 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10">
+                        Ronda {currentRound}/3
+                    </div>
+                    <div className="bg-green-500/90 px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-transform border border-green-400/30">
+                        Aciertos: {score}
+                    </div>
                 </div>
-                <div className="bg-green-500/90 px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-transform border border-green-400/30">
-                    Aciertos: {score}
-                </div>
-            </div>
+            )}
 
             {/* Game States */}
             {gameState === 'READY' && (
