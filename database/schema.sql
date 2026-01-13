@@ -83,11 +83,13 @@ CREATE TABLE IF NOT EXISTS respuestas (
 CREATE TABLE IF NOT EXISTS participaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
+    marca_bayer_id INT,
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     aciertos INT DEFAULT 0,
     gano BOOLEAN DEFAULT FALSE,
     numero_participante INT DEFAULT 1,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (marca_bayer_id) REFERENCES marcas_bayer(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS respuestas_participantes (

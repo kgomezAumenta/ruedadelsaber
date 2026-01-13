@@ -22,10 +22,10 @@ export async function getPreguntasByMarcaBayer(paisId: number, marcaBayerId: num
     return preguntas;
 }
 
-export async function createParticipacion(usuarioId: number, numeroParticipante: number = 1): Promise<number> {
+export async function createParticipacion(usuarioId: number, marcaBayerId: number, numeroParticipante: number = 1): Promise<number> {
     const [result] = await pool.query<ResultSetHeader>(
-        'INSERT INTO participaciones (usuario_id, fecha, numero_participante) VALUES (?, NOW(), ?)',
-        [usuarioId, numeroParticipante]
+        'INSERT INTO participaciones (usuario_id, marca_bayer_id, fecha, numero_participante) VALUES (?, ?, NOW(), ?)',
+        [usuarioId, marcaBayerId, numeroParticipante]
     );
     return result.insertId;
 }

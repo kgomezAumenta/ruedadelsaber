@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, PieChart } from 'lucide-react';
+import { Download, PieChart, BarChart } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 export default function ReportsPage() {
     const [stats, setStats] = useState<any>(null);
@@ -12,21 +13,16 @@ export default function ReportsPage() {
             .then(data => setStats(data));
     }, []);
 
-    const handleDownloadCSV = async () => {
+    const handleDownloadExcel = async () => {
         const res = await fetch('/api/admin/reports?type=csv');
         const data = await res.json();
 
-        // Convert to CSV
-        const headers = Object.keys(data[0]).join(',');
-        const rows = data.map((row: any) => Object.values(row).join(',')).join('\n');
-        const csv = `${headers}\n${rows}`;
+        // Use xlsx to create a proper Excel file
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Participaciones");
 
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'reporte_participaciones.csv';
-        a.click();
+        XLSX.writeFile(wb, "reporte_participaciones.xlsx");
     };
 
     if (!stats) return <div>Cargando reportes...</div>;
@@ -36,11 +32,11 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Reportes</h1>
                 <button
-                    onClick={handleDownloadCSV}
-                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    onClick={handleDownloadExcel}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors shadow-md"
                 >
                     <Download className="w-5 h-5" />
-                    Exportar CSV
+                    Exportar Excel (.xlsx)
                 </button>
             </div>
 
@@ -69,15 +65,44 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <BarChart className="w-5 h-5 text-purple-600" />
+                        Participaciones por Marca Bayer
+                    </h3>
+                    <div className="space-y-4">
+                        {stats.porMarca.map((item: any) => (
+                            <div key={item.nombre} className="flex justify-between items-center">
+                                <span className="text-gray-600">{item.nombre || 'Sin Marca'}</span>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-purple-500"
+                                            style={{ width: `${(item.count / stats.total) * 100}%` }}
+                                        />
+                                    </div>
+                                    <span className="font-bold text-gray-800">{item.count}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 col-span-1 md:col-span-2">
                     <h3 className="text-lg font-bold text-gray-800 mb-4">Resumen General</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-blue-50 rounded-lg text-center">
-                            <p className="text-sm text-blue-600 font-medium">Total Participaciones</p>
-                            <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className="p-6 bg-blue-50 rounded-2xl text-center border border-blue-100">
+                            <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mb-2">Total Participaciones</p>
+                            <p className="text-4xl font-black text-blue-900">{stats.total}</p>
                         </div>
-                        <div className="p-4 bg-green-50 rounded-lg text-center">
-                            <p className="text-sm text-green-600 font-medium">Ganadores</p>
-                            <p className="text-3xl font-bold text-green-900">{stats.ganadores}</p>
+                        <div className="p-6 bg-green-50 rounded-2xl text-center border border-green-100">
+                            <p className="text-sm text-green-600 font-bold uppercase tracking-wider mb-2">Ganadores</p>
+                            <p className="text-4xl font-black text-green-900">{stats.ganadores}</p>
+                        </div>
+                        <div className="p-6 bg-purple-50 rounded-2xl text-center border border-purple-100">
+                            <p className="text-sm text-purple-600 font-bold uppercase tracking-wider mb-2">Efectividad</p>
+                            <p className="text-4xl font-black text-purple-900">
+                                {stats.total > 0 ? Math.round((stats.ganadores / stats.total) * 100) : 0}%
+                            </p>
                         </div>
                     </div>
                 </div>

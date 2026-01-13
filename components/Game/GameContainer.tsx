@@ -103,6 +103,7 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
                     body: JSON.stringify({
                         aciertos: currentScore,
                         gano,
+                        marca_bayer_id: marcaBayerId,
                         numero_participante: currentParticipant
                     }),
                 });

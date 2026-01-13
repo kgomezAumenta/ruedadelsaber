@@ -13,12 +13,15 @@ export async function GET(request: Request) {
           p.id, 
           u.nombre as usuario, 
           pa.nombre as pais,
+          mb.nombre as marca_bayer,
           p.fecha, 
           p.aciertos, 
-          p.gano 
+          p.gano,
+          p.numero_participante
         FROM participaciones p
         JOIN usuarios u ON p.usuario_id = u.id
         LEFT JOIN paises pa ON u.pais_id = pa.id
+        LEFT JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
         ORDER BY p.fecha DESC
       `);
             return NextResponse.json(rows);
@@ -36,10 +39,18 @@ export async function GET(request: Request) {
       GROUP BY pa.nombre
     `);
 
+        const [porMarca] = await pool.query<RowDataPacket[]>(`
+      SELECT mb.nombre, COUNT(*) as count 
+      FROM participaciones p
+      JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
+      GROUP BY mb.nombre
+    `);
+
         return NextResponse.json({
             total: totalParticipaciones[0].count,
             ganadores: ganadores[0].count,
-            porPais
+            porPais,
+            porMarca
         });
 
     } catch (error) {

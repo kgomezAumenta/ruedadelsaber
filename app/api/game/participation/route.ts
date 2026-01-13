@@ -12,13 +12,18 @@ export async function POST(request: NextRequest) {
         const { payload } = await jwtVerify(token, JWT_SECRET);
         const userId = payload.userId as number;
 
-        const { aciertos, gano, numero_participante } = await request.json();
+        const { aciertos, gano, marca_bayer_id, numero_participante } = await request.json();
+        const marcaId = parseInt(marca_bayer_id);
+
+        if (isNaN(marcaId)) {
+            return NextResponse.json({ error: 'Invalid Marca Bayer ID' }, { status: 400 });
+        }
 
         // In a real scenario, we would create the participation at start and update it at end.
         // For simplicity, we create it here or just record it.
         // The model has createParticipacion and updateParticipacion.
 
-        const id = await createParticipacion(userId, numero_participante || 1);
+        const id = await createParticipacion(userId, marcaId, numero_participante || 1);
         await updateParticipacion(id, aciertos, gano);
 
         return NextResponse.json({ success: true, id });
