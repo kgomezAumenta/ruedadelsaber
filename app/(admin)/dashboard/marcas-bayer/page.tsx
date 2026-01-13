@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DataTable from '@/components/Admin/DataTable';
 import Modal from '@/components/Admin/Modal';
 import { Plus, Upload, Image as ImageIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MarcaBayer {
     id: number;
@@ -11,6 +12,7 @@ interface MarcaBayer {
     pais_id: number;
     logo_url: string | null;
     banner_url: string | null;
+    activa: boolean;
     pais_nombre: string;
 }
 
@@ -29,7 +31,8 @@ export default function MarcasBayerPage() {
         nombre: '',
         pais_id: '',
         logo_url: '',
-        banner_url: ''
+        banner_url: '',
+        activa: true
     });
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
@@ -57,7 +60,7 @@ export default function MarcasBayerPage() {
 
     const handleCreate = () => {
         setEditingMarca(null);
-        setFormData({ nombre: '', pais_id: '', logo_url: '', banner_url: '' });
+        setFormData({ nombre: '', pais_id: '', logo_url: '', banner_url: '', activa: true });
         setModalOpen(true);
     };
 
@@ -67,7 +70,8 @@ export default function MarcasBayerPage() {
             nombre: marca.nombre,
             pais_id: marca.pais_id.toString(),
             logo_url: marca.logo_url || '',
-            banner_url: marca.banner_url || ''
+            banner_url: marca.banner_url || '',
+            activa: Boolean(marca.activa)
         });
         setModalOpen(true);
     };
@@ -154,6 +158,17 @@ export default function MarcasBayerPage() {
                 item.banner_url ? (
                     <img src={item.banner_url} alt="Banner" className="h-8 w-16 object-cover rounded" />
                 ) : <span className="text-gray-400 text-xs">Sin banner</span>
+            )) as any
+        },
+        {
+            header: 'Estado',
+            accessor: ((item: MarcaBayer) => (
+                <span className={cn(
+                    "px-2 py-1 rounded-full text-xs font-bold",
+                    item.activa ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                )}>
+                    {item.activa ? 'Activa' : 'Inactiva'}
+                </span>
             )) as any
         },
     ];
@@ -264,6 +279,20 @@ export default function MarcasBayerPage() {
                                 />
                             </label>
                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <input
+                            type="checkbox"
+                            role="switch"
+                            id="activa"
+                            checked={formData.activa}
+                            onChange={(e) => setFormData({ ...formData, activa: e.target.checked })}
+                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="activa" className="text-sm font-bold text-gray-700 cursor-pointer">
+                            Marca Activa (visible en el sitio)
+                        </label>
                     </div>
 
                     <div className="flex gap-3 pt-4 border-t">

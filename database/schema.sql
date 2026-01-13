@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS marcas_bayer (
     pais_id INT NOT NULL,
     logo_url VARCHAR(255),
     banner_url VARCHAR(255),
+    activa BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (pais_id) REFERENCES paises(id) ON DELETE CASCADE
 );

@@ -23,7 +23,7 @@ export async function getUbicaciones(marcaId: number): Promise<Ubicacion[]> {
 }
 
 export async function getMarcasBayer(paisId: number): Promise<MarcaBayer[]> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM marcas_bayer WHERE pais_id = ? ORDER BY nombre', [paisId]);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM marcas_bayer WHERE pais_id = ? AND activa = TRUE ORDER BY nombre', [paisId]);
     return rows as MarcaBayer[];
 }
 
