@@ -1,5 +1,6 @@
 import GameContainer from '@/components/Game/GameContainer';
 import { getPreguntasByMarcaBayer } from '@/models/Juego';
+import { redirect } from 'next/navigation';
 
 export default async function GamePage({
     params,
@@ -14,6 +15,11 @@ export default async function GamePage({
     const paisId = parseInt(paisIdStr);
     const marcaBayerId = parseInt(marcaBayerIdStr);
     const totalParticipants = participantes ? parseInt(participantes) : 1;
+
+    // Validate that parameters are valid numbers
+    if (isNaN(paisId) || isNaN(marcaBayerId)) {
+        redirect('/');
+    }
 
     // Fetch questions server-side
     const preguntas = await getPreguntasByMarcaBayer(paisId, marcaBayerId);

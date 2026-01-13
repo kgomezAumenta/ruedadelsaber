@@ -2,10 +2,17 @@ import { getGrupos, getMarcas, getUbicaciones } from '@/models/Catalogos';
 import SetupForm from '@/components/SetupForm';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import { redirect } from 'next/navigation';
 
 export default async function SetupPage({ params }: { params: Promise<{ paisId: string; marcaBayerId: string }> }) {
     const { paisId: paisIdStr, marcaBayerId } = await params;
     const paisId = parseInt(paisIdStr);
+    const marcaBayerIdNum = parseInt(marcaBayerId);
+
+    // Validate that parameters are valid numbers
+    if (isNaN(paisId) || isNaN(marcaBayerIdNum)) {
+        redirect('/');
+    }
 
     // Fetch all data for the country to pass to client component for filtering
     // Optimization: In a real large app, we might want to fetch only groups first, then others via API.

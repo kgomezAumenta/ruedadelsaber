@@ -1,10 +1,18 @@
 import Link from 'next/link';
 import { getMarcasBayer } from '@/models/Catalogos';
 import { ArrowLeft } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default async function BrandSelection({ params }: { params: Promise<{ paisId: string }> }) {
     const { paisId } = await params;
-    const marcasBayer = await getMarcasBayer(parseInt(paisId));
+
+    // Validate that paisId is a valid number
+    const paisIdNum = parseInt(paisId);
+    if (isNaN(paisIdNum)) {
+        redirect('/');
+    }
+
+    const marcasBayer = await getMarcasBayer(paisIdNum);
 
     return (
         <div className="w-full max-w-4xl text-center">
