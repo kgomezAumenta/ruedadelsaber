@@ -15,10 +15,10 @@ export async function getUserById(id: number): Promise<Usuario | null> {
 }
 
 export async function createUser(user: Omit<Usuario, 'id' | 'created_at'>): Promise<number> {
-    const { nombre, email, password_hash, rol, pais_id, grupo_id, marca_id, ubicacion_id } = user;
+    const { nombre, email, password_hash, rol, pais_id, punto_venta_id, ubicacion_id } = user;
     const [result] = await pool.query<ResultSetHeader>(
-        'INSERT INTO usuarios (nombre, email, password_hash, rol, pais_id, grupo_id, marca_id, ubicacion_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [nombre, email, password_hash, rol, pais_id, grupo_id, marca_id, ubicacion_id]
+        'INSERT INTO usuarios (nombre, email, password_hash, rol, pais_id, punto_venta_id, ubicacion_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [nombre, email, password_hash, rol, pais_id, punto_venta_id, ubicacion_id]
     );
     return result.insertId;
 }

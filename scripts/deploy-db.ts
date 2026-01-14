@@ -36,7 +36,7 @@ async function deploy() {
 
         // Clear existing data to avoid duplicates
         await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-        const tables = ['respuestas_participantes', 'participaciones', 'respuestas', 'preguntas', 'usuarios', 'marcas_bayer', 'ubicaciones', 'marcas', 'grupos', 'paises'];
+        const tables = ['respuestas_participantes', 'participaciones', 'respuestas', 'preguntas', 'usuarios', 'marcas_bayer', 'ubicaciones', 'puntos_venta', 'paises'];
         for (const table of tables) {
             try {
                 await connection.query(`TRUNCATE TABLE ${table}`);
@@ -54,24 +54,17 @@ async function deploy() {
             (3, 'Panamá')
         `);
 
-        // Insert Grupos
+        // Insert Puntos de Venta
         await connection.query(`
-            INSERT INTO grupos (id, nombre, pais_id) VALUES 
-            (1, 'Grupo Unicomer', 1),
-            (2, 'Grupo Monge', 1)
-        `);
-
-        // Insert Marcas
-        await connection.query(`
-            INSERT INTO marcas (id, nombre, grupo_id) VALUES 
+            INSERT INTO puntos_venta (id, nombre, pais_id) VALUES 
             (1, 'Gollo', 1),
             (2, 'La Curacao', 1),
-            (3, 'Monge', 2)
+            (3, 'Monge', 1)
         `);
 
         // Insert Ubicaciones
         await connection.query(`
-            INSERT INTO ubicaciones (id, nombre, marca_id) VALUES 
+            INSERT INTO ubicaciones (id, nombre, punto_venta_id) VALUES 
             (1, 'Gollo Zapote', 1),
             (2, 'Gollo San Pedro', 1),
             (3, 'Monge Escazú', 3)

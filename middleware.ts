@@ -9,9 +9,9 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // DEVELOPMENT MODE: Skip auth in development
-    if (process.env.NODE_ENV === 'development') {
+    /*if (process.env.NODE_ENV === 'development') {
         return NextResponse.next();
-    }
+    }*/
 
     // Public routes
     if (pathname === '/' || pathname.endsWith('/login') || pathname.startsWith('/api/auth') || pathname.startsWith('/_next') || pathname.includes('.')) {

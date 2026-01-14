@@ -3,22 +3,16 @@ export interface Pais {
     nombre: string;
 }
 
-export interface Grupo {
+export interface PuntoVenta {
     id: number;
     nombre: string;
     pais_id: number;
 }
 
-export interface Marca {
-    id: number;
-    nombre: string;
-    grupo_id: number;
-}
-
 export interface Ubicacion {
     id: number;
     nombre: string;
-    marca_id: number;
+    punto_venta_id: number;
 }
 
 export interface MarcaBayer {
@@ -36,8 +30,7 @@ export interface Usuario {
     password_hash: string;
     rol: 'admin' | 'editor' | 'promotor';
     pais_id?: number;
-    grupo_id?: number;
-    marca_id?: number;
+    punto_venta_id?: number;
     ubicacion_id?: number;
 }
 

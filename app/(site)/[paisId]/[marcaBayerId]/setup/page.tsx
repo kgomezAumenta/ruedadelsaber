@@ -1,4 +1,3 @@
-import { getGrupos, getMarcas, getUbicaciones } from '@/models/Catalogos';
 import SetupForm from '@/components/SetupForm';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
@@ -14,26 +13,15 @@ export default async function SetupPage({ params }: { params: Promise<{ paisId: 
         redirect('/');
     }
 
-    // Fetch all data for the country to pass to client component for filtering
-    // Optimization: In a real large app, we might want to fetch only groups first, then others via API.
-    // But for this scale, fetching all is fine.
-
-    const grupos = await getGrupos(paisId);
-
-    // We need to fetch ALL brands and locations that belong to these groups/brands
-    // This is a bit inefficient with current model functions which filter by ID.
-    // Let's do a custom query or fetch all for the country.
-
-    // Fetch all brands for the country's groups
-    const [marcasRows] = await pool.query<RowDataPacket[]>(
-        'SELECT m.* FROM marcas m JOIN grupos g ON m.grupo_id = g.id WHERE g.pais_id = ?',
+    // Fetch points of sale and locations for the country
+    const [pvRows] = await pool.query<RowDataPacket[]>(
+        'SELECT * FROM puntos_venta WHERE pais_id = ? ORDER BY nombre',
         [paisId]
     );
-    const marcas = marcasRows as any[];
+    const puntosVenta = pvRows as any[];
 
-    // Fetch all locations for the country's brands
     const [ubicacionesRows] = await pool.query<RowDataPacket[]>(
-        'SELECT u.* FROM ubicaciones u JOIN marcas m ON u.marca_id = m.id JOIN grupos g ON m.grupo_id = g.id WHERE g.pais_id = ?',
+        'SELECT u.* FROM ubicaciones u JOIN puntos_venta pv ON u.punto_venta_id = pv.id WHERE pv.pais_id = ?',
         [paisId]
     );
     const ubicaciones = ubicacionesRows as any[];
@@ -46,8 +34,7 @@ export default async function SetupPage({ params }: { params: Promise<{ paisId: 
                 </h1>
 
                 <SetupForm
-                    grupos={grupos}
-                    marcas={marcas}
+                    puntosVenta={puntosVenta}
                     ubicaciones={ubicaciones}
                     paisId={paisIdStr}
                     marcaBayerId={marcaBayerId}

@@ -12,6 +12,8 @@ interface Usuario {
     rol: string;
     pais_id: number | null;
     pais_nombre: string | null;
+    punto_venta_id: number | null;
+    punto_venta_nombre: string | null;
 }
 
 interface Pais {
@@ -19,9 +21,16 @@ interface Pais {
     nombre: string;
 }
 
+interface PuntoVenta {
+    id: number;
+    nombre: string;
+    pais_id: number;
+}
+
 export default function UsuariosPage() {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [paises, setPaises] = useState<Pais[]>([]);
+    const [puntosVenta, setPuntosVenta] = useState<PuntoVenta[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
@@ -30,7 +39,8 @@ export default function UsuariosPage() {
         email: '',
         password: '',
         rol: 'promotor',
-        pais_id: ''
+        pais_id: '',
+        punto_venta_id: ''
     });
 
     useEffect(() => {
@@ -39,14 +49,17 @@ export default function UsuariosPage() {
 
     const fetchData = async () => {
         try {
-            const [usuariosRes, paisesRes] = await Promise.all([
+            const [usuariosRes, paisesRes, pvRes] = await Promise.all([
                 fetch('/api/admin/usuarios'),
-                fetch('/api/admin/paises')
+                fetch('/api/admin/paises'),
+                fetch('/api/admin/puntos-venta')
             ]);
             const usuariosData = await usuariosRes.json();
             const paisesData = await paisesRes.json();
+            const pvData = await pvRes.json();
             setUsuarios(usuariosData);
             setPaises(paisesData);
+            setPuntosVenta(pvData);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -56,7 +69,7 @@ export default function UsuariosPage() {
 
     const handleCreate = () => {
         setEditingUsuario(null);
-        setFormData({ nombre: '', email: '', password: '', rol: 'promotor', pais_id: '' });
+        setFormData({ nombre: '', email: '', password: '', rol: 'promotor', pais_id: '', punto_venta_id: '' });
         setModalOpen(true);
     };
 
@@ -67,7 +80,8 @@ export default function UsuariosPage() {
             email: usuario.email,
             password: '',
             rol: usuario.rol,
-            pais_id: usuario.pais_id?.toString() || ''
+            pais_id: usuario.pais_id?.toString() || '',
+            punto_venta_id: usuario.punto_venta_id?.toString() || ''
         });
         setModalOpen(true);
     };
@@ -92,11 +106,13 @@ export default function UsuariosPage() {
                 ? {
                     id: editingUsuario.id,
                     ...formData,
-                    pais_id: formData.pais_id ? parseInt(formData.pais_id) : null
+                    pais_id: formData.pais_id ? parseInt(formData.pais_id) : null,
+                    punto_venta_id: formData.punto_venta_id ? parseInt(formData.punto_venta_id) : null
                 }
                 : {
                     ...formData,
-                    pais_id: formData.pais_id ? parseInt(formData.pais_id) : null
+                    pais_id: formData.pais_id ? parseInt(formData.pais_id) : null,
+                    punto_venta_id: formData.punto_venta_id ? parseInt(formData.punto_venta_id) : null
                 };
 
             await fetch('/api/admin/usuarios', {
@@ -117,7 +133,13 @@ export default function UsuariosPage() {
         { header: 'Email', accessor: 'email' as keyof Usuario },
         { header: 'Rol', accessor: 'rol' as keyof Usuario },
         { header: 'País', accessor: 'pais_nombre' as keyof Usuario },
+        { header: 'Punto de Venta', accessor: 'punto_venta_nombre' as keyof Usuario },
     ];
+
+    // Filter points of sale by selected country
+    const filteredPuntosVenta = formData.pais_id
+        ? puntosVenta.filter(pv => pv.pais_id === parseInt(formData.pais_id))
+        : [];
 
     if (loading) {
         return <div className="flex items-center justify-center h-64">
@@ -150,62 +172,83 @@ export default function UsuariosPage() {
 
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingUsuario ? 'Editar Usuario' : 'Nuevo Usuario'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
-                        <input
-                            type="text"
-                            value={formData.nombre}
-                            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                            <input
+                                type="text"
+                                value={formData.nombre}
+                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                required
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Contraseña {editingUsuario && '(dejar vacío)'}
+                            </label>
+                            <input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                required={!editingUsuario}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                            <select
+                                value={formData.rol}
+                                onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                required
+                            >
+                                <option value="promotor">Promotor</option>
+                                <option value="editor">Editor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Contraseña {editingUsuario && '(dejar vacío para no cambiar)'}
-                        </label>
-                        <input
-                            type="password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required={!editingUsuario}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
-                        <select
-                            value={formData.rol}
-                            onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        >
-                            <option value="promotor">Promotor</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">País (opcional)</label>
-                        <select
-                            value={formData.pais_id}
-                            onChange={(e) => setFormData({ ...formData, pais_id: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Sin país asignado</option>
-                            {paises.map((pais) => (
-                                <option key={pais.id} value={pais.id}>{pais.nombre}</option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">País (opcional)</label>
+                            <select
+                                value={formData.pais_id}
+                                onChange={(e) => setFormData({ ...formData, pais_id: e.target.value, punto_venta_id: '' })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">Sin país asignado</option>
+                                {paises.map((pais) => (
+                                    <option key={pais.id} value={pais.id}>{pais.nombre}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Punto de Venta (opcional)</label>
+                            <select
+                                value={formData.punto_venta_id}
+                                onChange={(e) => setFormData({ ...formData, punto_venta_id: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                disabled={!formData.pais_id}
+                            >
+                                <option value="">Sin punto de venta</option>
+                                {filteredPuntosVenta.map((pv) => (
+                                    <option key={pv.id} value={pv.id}>{pv.nombre}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                     <div className="flex gap-3 pt-4">
                         <button

@@ -5,27 +5,25 @@ import DataTable from '@/components/Admin/DataTable';
 import Modal from '@/components/Admin/Modal';
 import { Plus } from 'lucide-react';
 
-interface Marca {
+interface PuntoVenta {
     id: number;
     nombre: string;
-    grupo_id: number;
-    grupo_nombre: string;
+    pais_id: number;
     pais_nombre: string;
 }
 
-interface Grupo {
+interface Pais {
     id: number;
     nombre: string;
-    pais_nombre: string;
 }
 
-export default function MarcasPage() {
-    const [marcas, setMarcas] = useState<Marca[]>([]);
-    const [grupos, setGrupos] = useState<Grupo[]>([]);
+export default function PuntosVentaPage() {
+    const [puntosVenta, setPuntosVenta] = useState<PuntoVenta[]>([]);
+    const [paises, setPaises] = useState<Pais[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingMarca, setEditingMarca] = useState<Marca | null>(null);
-    const [formData, setFormData] = useState({ nombre: '', grupo_id: '' });
+    const [editingPunto, setEditingPunto] = useState<PuntoVenta | null>(null);
+    const [formData, setFormData] = useState({ nombre: '', pais_id: '' });
 
     useEffect(() => {
         fetchData();
@@ -33,14 +31,14 @@ export default function MarcasPage() {
 
     const fetchData = async () => {
         try {
-            const [marcasRes, gruposRes] = await Promise.all([
-                fetch('/api/admin/marcas'),
-                fetch('/api/admin/grupos')
+            const [pvRes, paisesRes] = await Promise.all([
+                fetch('/api/admin/puntos-venta'),
+                fetch('/api/admin/paises')
             ]);
-            const marcasData = await marcasRes.json();
-            const gruposData = await gruposRes.json();
-            setMarcas(marcasData);
-            setGrupos(gruposData);
+            const pvData = await pvRes.json();
+            const paisesData = await paisesRes.json();
+            setPuntosVenta(pvData);
+            setPaises(paisesData);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -49,25 +47,25 @@ export default function MarcasPage() {
     };
 
     const handleCreate = () => {
-        setEditingMarca(null);
-        setFormData({ nombre: '', grupo_id: '' });
+        setEditingPunto(null);
+        setFormData({ nombre: '', pais_id: '' });
         setModalOpen(true);
     };
 
-    const handleEdit = (marca: Marca) => {
-        setEditingMarca(marca);
-        setFormData({ nombre: marca.nombre, grupo_id: marca.grupo_id.toString() });
+    const handleEdit = (punto: PuntoVenta) => {
+        setEditingPunto(punto);
+        setFormData({ nombre: punto.nombre, pais_id: punto.pais_id.toString() });
         setModalOpen(true);
     };
 
-    const handleDelete = async (marca: Marca) => {
-        if (!confirm('¿Estás seguro de eliminar esta marca?')) return;
+    const handleDelete = async (punto: PuntoVenta) => {
+        if (!confirm('¿Estás seguro de eliminar este punto de venta?')) return;
 
         try {
-            await fetch(`/api/admin/marcas?id=${marca.id}`, { method: 'DELETE' });
+            await fetch(`/api/admin/puntos-venta?id=${punto.id}`, { method: 'DELETE' });
             fetchData();
         } catch (error) {
-            console.error('Error deleting marca:', error);
+            console.error('Error deleting punto de venta:', error);
         }
     };
 
@@ -75,12 +73,12 @@ export default function MarcasPage() {
         e.preventDefault();
 
         try {
-            const method = editingMarca ? 'PUT' : 'POST';
-            const body = editingMarca
-                ? { id: editingMarca.id, ...formData, grupo_id: parseInt(formData.grupo_id) }
-                : { ...formData, grupo_id: parseInt(formData.grupo_id) };
+            const method = editingPunto ? 'PUT' : 'POST';
+            const body = editingPunto
+                ? { id: editingPunto.id, ...formData, pais_id: parseInt(formData.pais_id) }
+                : { ...formData, pais_id: parseInt(formData.pais_id) };
 
-            await fetch('/api/admin/marcas', {
+            await fetch('/api/admin/puntos-venta', {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -89,14 +87,13 @@ export default function MarcasPage() {
             setModalOpen(false);
             fetchData();
         } catch (error) {
-            console.error('Error saving marca:', error);
+            console.error('Error saving punto de venta:', error);
         }
     };
 
     const columns = [
-        { header: 'Nombre', accessor: 'nombre' as keyof Marca },
-        { header: 'Grupo', accessor: 'grupo_nombre' as keyof Marca },
-        { header: 'País', accessor: 'pais_nombre' as keyof Marca },
+        { header: 'Nombre', accessor: 'nombre' as keyof PuntoVenta },
+        { header: 'País', accessor: 'pais_nombre' as keyof PuntoVenta },
     ];
 
     if (loading) {
@@ -109,26 +106,26 @@ export default function MarcasPage() {
         <div>
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Marcas</h1>
-                    <p className="text-gray-500 mt-2">Gestión de marcas por grupo</p>
+                    <h1 className="text-3xl font-bold text-gray-800">Puntos de Venta</h1>
+                    <p className="text-gray-500 mt-2">Gestión de puntos de venta por país</p>
                 </div>
                 <button
                     onClick={handleCreate}
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md"
                 >
                     <Plus className="w-5 h-5" />
-                    Nueva Marca
+                    Nuevo Punto de Venta
                 </button>
             </div>
 
             <DataTable
-                data={marcas}
+                data={puntosVenta}
                 columns={columns}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
             />
 
-            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingMarca ? 'Editar Marca' : 'Nueva Marca'}>
+            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingPunto ? 'Editar Punto de Venta' : 'Nuevo Punto de Venta'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
@@ -141,17 +138,17 @@ export default function MarcasPage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Grupo</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">País</label>
                         <select
-                            value={formData.grupo_id}
-                            onChange={(e) => setFormData({ ...formData, grupo_id: e.target.value })}
+                            value={formData.pais_id}
+                            onChange={(e) => setFormData({ ...formData, pais_id: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
-                            <option value="">Seleccionar grupo</option>
-                            {grupos.map((grupo) => (
-                                <option key={grupo.id} value={grupo.id}>
-                                    {grupo.nombre} ({grupo.pais_nombre})
+                            <option value="">Seleccionar país</option>
+                            {paises.map((pais) => (
+                                <option key={pais.id} value={pais.id}>
+                                    {pais.nombre}
                                 </option>
                             ))}
                         </select>
@@ -161,7 +158,7 @@ export default function MarcasPage() {
                             type="submit"
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
                         >
-                            {editingMarca ? 'Actualizar' : 'Crear'}
+                            {editingPunto ? 'Actualizar' : 'Crear'}
                         </button>
                         <button
                             type="button"

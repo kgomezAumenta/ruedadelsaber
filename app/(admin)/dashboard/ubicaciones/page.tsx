@@ -8,25 +8,24 @@ import { Plus } from 'lucide-react';
 interface Ubicacion {
     id: number;
     nombre: string;
-    marca_id: number;
-    marca_nombre: string;
-    grupo_nombre: string;
+    punto_venta_id: number;
+    punto_venta_nombre: string;
     pais_nombre: string;
 }
 
-interface Marca {
+interface PuntoVenta {
     id: number;
     nombre: string;
-    grupo_nombre: string;
+    pais_nombre: string;
 }
 
 export default function UbicacionesPage() {
     const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
-    const [marcas, setMarcas] = useState<Marca[]>([]);
+    const [puntosVenta, setPuntosVenta] = useState<PuntoVenta[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingUbicacion, setEditingUbicacion] = useState<Ubicacion | null>(null);
-    const [formData, setFormData] = useState({ nombre: '', marca_id: '' });
+    const [formData, setFormData] = useState({ nombre: '', punto_venta_id: '' });
 
     useEffect(() => {
         fetchData();
@@ -34,14 +33,14 @@ export default function UbicacionesPage() {
 
     const fetchData = async () => {
         try {
-            const [ubicacionesRes, marcasRes] = await Promise.all([
+            const [ubicacionesRes, pvRes] = await Promise.all([
                 fetch('/api/admin/ubicaciones'),
-                fetch('/api/admin/marcas')
+                fetch('/api/admin/puntos-venta')
             ]);
             const ubicacionesData = await ubicacionesRes.json();
-            const marcasData = await marcasRes.json();
+            const pvData = await pvRes.json();
             setUbicaciones(ubicacionesData);
-            setMarcas(marcasData);
+            setPuntosVenta(pvData);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -51,13 +50,13 @@ export default function UbicacionesPage() {
 
     const handleCreate = () => {
         setEditingUbicacion(null);
-        setFormData({ nombre: '', marca_id: '' });
+        setFormData({ nombre: '', punto_venta_id: '' });
         setModalOpen(true);
     };
 
     const handleEdit = (ubicacion: Ubicacion) => {
         setEditingUbicacion(ubicacion);
-        setFormData({ nombre: ubicacion.nombre, marca_id: ubicacion.marca_id.toString() });
+        setFormData({ nombre: ubicacion.nombre, punto_venta_id: ubicacion.punto_venta_id.toString() });
         setModalOpen(true);
     };
 
@@ -78,8 +77,8 @@ export default function UbicacionesPage() {
         try {
             const method = editingUbicacion ? 'PUT' : 'POST';
             const body = editingUbicacion
-                ? { id: editingUbicacion.id, ...formData, marca_id: parseInt(formData.marca_id) }
-                : { ...formData, marca_id: parseInt(formData.marca_id) };
+                ? { id: editingUbicacion.id, ...formData, punto_venta_id: parseInt(formData.punto_venta_id) }
+                : { ...formData, punto_venta_id: parseInt(formData.punto_venta_id) };
 
             await fetch('/api/admin/ubicaciones', {
                 method,
@@ -96,8 +95,7 @@ export default function UbicacionesPage() {
 
     const columns = [
         { header: 'Nombre', accessor: 'nombre' as keyof Ubicacion },
-        { header: 'Marca', accessor: 'marca_nombre' as keyof Ubicacion },
-        { header: 'Grupo', accessor: 'grupo_nombre' as keyof Ubicacion },
+        { header: 'Punto de Venta', accessor: 'punto_venta_nombre' as keyof Ubicacion },
         { header: 'País', accessor: 'pais_nombre' as keyof Ubicacion },
     ];
 
@@ -112,7 +110,7 @@ export default function UbicacionesPage() {
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">Ubicaciones</h1>
-                    <p className="text-gray-500 mt-2">Gestión de ubicaciones por marca</p>
+                    <p className="text-gray-500 mt-2">Gestión de ubicaciones por punto de venta</p>
                 </div>
                 <button
                     onClick={handleCreate}
@@ -143,17 +141,17 @@ export default function UbicacionesPage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Punto de Venta</label>
                         <select
-                            value={formData.marca_id}
-                            onChange={(e) => setFormData({ ...formData, marca_id: e.target.value })}
+                            value={formData.punto_venta_id}
+                            onChange={(e) => setFormData({ ...formData, punto_venta_id: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
-                            <option value="">Seleccionar marca</option>
-                            {marcas.map((marca) => (
-                                <option key={marca.id} value={marca.id}>
-                                    {marca.nombre} - {marca.grupo_nombre}
+                            <option value="">Seleccionar punto de venta</option>
+                            {puntosVenta.map((pv) => (
+                                <option key={pv.id} value={pv.id}>
+                                    {pv.nombre} ({pv.pais_nombre})
                                 </option>
                             ))}
                         </select>

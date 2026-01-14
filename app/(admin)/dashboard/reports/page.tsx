@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, PieChart, BarChart } from 'lucide-react';
+import { Download, PieChart, BarChart, ShoppingBag } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function ReportsPage() {
@@ -66,11 +66,34 @@ export default function ReportsPage() {
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <ShoppingBag className="w-5 h-5 text-green-600" />
+                        Participaciones por Punto de Venta
+                    </h3>
+                    <div className="space-y-4">
+                        {stats.porPuntoVenta.map((item: any) => (
+                            <div key={item.nombre} className="flex justify-between items-center">
+                                <span className="text-gray-600">{item.nombre}</span>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-green-500"
+                                            style={{ width: `${(item.count / stats.total) * 100}%` }}
+                                        />
+                                    </div>
+                                    <span className="font-bold text-gray-800">{item.count}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <BarChart className="w-5 h-5 text-purple-600" />
                         Participaciones por Marca Bayer
                     </h3>
                     <div className="space-y-4">
-                        {stats.porMarca.map((item: any) => (
+                        {stats.porMarcaBayer.map((item: any) => (
                             <div key={item.nombre} className="flex justify-between items-center">
                                 <span className="text-gray-600">{item.nombre || 'Sin Marca'}</span>
                                 <div className="flex items-center gap-4">

@@ -2,41 +2,32 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Grupo, Marca, Ubicacion } from '@/models/types';
-import { Users, MapPin, Building2, Store } from 'lucide-react';
+import { PuntoVenta, Ubicacion } from '@/models/types';
+import { Users, MapPin, Store } from 'lucide-react';
 
 interface SetupFormProps {
-    grupos: Grupo[];
-    marcas: Marca[];
+    puntosVenta: PuntoVenta[];
     ubicaciones: Ubicacion[];
     paisId: string;
     marcaBayerId: string;
 }
 
-export default function SetupForm({ grupos, marcas, ubicaciones, paisId, marcaBayerId }: SetupFormProps) {
+export default function SetupForm({ puntosVenta, ubicaciones, paisId, marcaBayerId }: SetupFormProps) {
     const router = useRouter();
-    const [selectedGrupo, setSelectedGrupo] = useState<string>('');
-    const [selectedMarca, setSelectedMarca] = useState<string>('');
+    const [selectedPuntoVenta, setSelectedPuntoVenta] = useState<string>('');
     const [selectedUbicacion, setSelectedUbicacion] = useState<string>('');
     const [participantes, setParticipantes] = useState<number>(1);
 
-    // Filter brands based on selected group
-    const filteredMarcas = useMemo(() => {
-        return marcas.filter(m => m.grupo_id === parseInt(selectedGrupo));
-    }, [selectedGrupo, marcas]);
-
-    // Filter locations based on selected brand
+    // Filter locations based on selected point of sale
     const filteredUbicaciones = useMemo(() => {
-        return ubicaciones.filter(u => u.marca_id === parseInt(selectedMarca));
-    }, [selectedMarca, ubicaciones]);
+        return ubicaciones.filter(u => u.punto_venta_id === parseInt(selectedPuntoVenta));
+    }, [selectedPuntoVenta, ubicaciones]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Save setup to sessionStorage or context if needed, or pass via URL params
-        // For now, we'll pass via URL params to the game/institutional page
+
         const query = new URLSearchParams({
-            grupo: selectedGrupo,
-            marca: selectedMarca,
+            punto_venta: selectedPuntoVenta,
             ubicacion: selectedUbicacion,
             participantes: participantes.toString(),
         });
@@ -47,44 +38,21 @@ export default function SetupForm({ grupos, marcas, ubicaciones, paisId, marcaBa
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Grupo</label>
+                <label className="text-sm font-medium text-gray-700">Punto de Venta</label>
                 <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <select
-                        value={selectedGrupo}
+                        value={selectedPuntoVenta}
                         onChange={(e) => {
-                            setSelectedGrupo(e.target.value);
-                            setSelectedMarca('');
+                            setSelectedPuntoVenta(e.target.value);
                             setSelectedUbicacion('');
                         }}
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 appearance-none bg-white"
                         required
                     >
-                        <option value="">Seleccione un Grupo</option>
-                        {grupos.map(g => (
-                            <option key={g.id} value={g.id}>{g.nombre}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Marca</label>
-                <div className="relative">
-                    <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
-                        value={selectedMarca}
-                        onChange={(e) => {
-                            setSelectedMarca(e.target.value);
-                            setSelectedUbicacion('');
-                        }}
-                        disabled={!selectedGrupo}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 appearance-none bg-white disabled:bg-gray-100"
-                        required
-                    >
-                        <option value="">Seleccione una Marca</option>
-                        {filteredMarcas.map(m => (
-                            <option key={m.id} value={m.id}>{m.nombre}</option>
+                        <option value="">Seleccione un Punto de Venta</option>
+                        {puntosVenta?.map(pv => (
+                            <option key={pv.id} value={pv.id}>{pv.nombre}</option>
                         ))}
                     </select>
                 </div>
@@ -97,7 +65,7 @@ export default function SetupForm({ grupos, marcas, ubicaciones, paisId, marcaBa
                     <select
                         value={selectedUbicacion}
                         onChange={(e) => setSelectedUbicacion(e.target.value)}
-                        disabled={!selectedMarca}
+                        disabled={!selectedPuntoVenta}
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 appearance-none bg-white disabled:bg-gray-100"
                         required
                     >

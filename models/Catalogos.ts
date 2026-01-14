@@ -1,24 +1,19 @@
 import pool from '@/lib/db';
-import { Pais, Grupo, Marca, Ubicacion, MarcaBayer } from './types';
 import { RowDataPacket } from 'mysql2';
+import { Pais, PuntoVenta, Ubicacion, MarcaBayer } from './types';
 
 export async function getPaises(): Promise<Pais[]> {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM paises ORDER BY nombre');
     return rows as Pais[];
 }
 
-export async function getGrupos(paisId: number): Promise<Grupo[]> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM grupos WHERE pais_id = ? ORDER BY nombre', [paisId]);
-    return rows as Grupo[];
+export async function getPuntosVenta(paisId: number): Promise<PuntoVenta[]> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM puntos_venta WHERE pais_id = ? ORDER BY nombre', [paisId]);
+    return rows as PuntoVenta[];
 }
 
-export async function getMarcas(grupoId: number): Promise<Marca[]> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM marcas WHERE grupo_id = ? ORDER BY nombre', [grupoId]);
-    return rows as Marca[];
-}
-
-export async function getUbicaciones(marcaId: number): Promise<Ubicacion[]> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM ubicaciones WHERE marca_id = ? ORDER BY nombre', [marcaId]);
+export async function getUbicaciones(puntoVentaId: number): Promise<Ubicacion[]> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM ubicaciones WHERE punto_venta_id = ? ORDER BY nombre', [puntoVentaId]);
     return rows as Ubicacion[];
 }
 

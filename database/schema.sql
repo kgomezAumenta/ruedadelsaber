@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS paises (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS grupos (
+CREATE TABLE IF NOT EXISTS puntos_venta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     pais_id INT NOT NULL,
@@ -18,20 +18,12 @@ CREATE TABLE IF NOT EXISTS grupos (
     FOREIGN KEY (pais_id) REFERENCES paises(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS marcas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    grupo_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS ubicaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
-    marca_id INT NOT NULL,
+    punto_venta_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (marca_id) REFERENCES marcas(id) ON DELETE CASCADE
+    FOREIGN KEY (punto_venta_id) REFERENCES puntos_venta(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS marcas_bayer (
@@ -52,13 +44,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password_hash VARCHAR(255) NOT NULL,
     rol ENUM('admin', 'editor', 'promotor') DEFAULT 'promotor',
     pais_id INT,
-    grupo_id INT,
-    marca_id INT,
+    punto_venta_id INT,
     ubicacion_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (pais_id) REFERENCES paises(id) ON DELETE SET NULL,
-    FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE SET NULL,
-    FOREIGN KEY (marca_id) REFERENCES marcas(id) ON DELETE SET NULL,
+    FOREIGN KEY (punto_venta_id) REFERENCES puntos_venta(id) ON DELETE SET NULL,
     FOREIGN KEY (ubicacion_id) REFERENCES ubicaciones(id) ON DELETE SET NULL
 );
 
