@@ -9,6 +9,7 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  multipleStatements: true
 };
 
 // Debug log (will show in Vercel build logs)

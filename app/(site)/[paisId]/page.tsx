@@ -25,31 +25,30 @@ export default async function BrandSelection({ params }: { params: Promise<{ pai
                 Selecciona la Marca
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-4 md:px-0">
                 {marcasBayer.map((marca) => (
                     <Link
                         key={marca.id}
                         href={`/${paisId}/${marca.id}/login`}
-                        className="group relative overflow-hidden rounded-2xl bg-white p-8 hover:scale-105 transition-all duration-300 shadow-xl"
+                        className="group relative overflow-hidden rounded-xl bg-blue-900 p-8 hover:scale-105 transition-all duration-300 shadow-lg flex flex-col items-center justify-between aspect-square border border-white/10"
                     >
-                        <div className="flex flex-col items-center gap-6">
+                        <div className="w-full flex-1 flex items-center justify-center p-4">
                             {marca.logo_url ? (
-                                <div className="w-32 h-32 relative flex items-center justify-center">
+                                <div className="relative w-full h-full flex items-center justify-center">
                                     <img
                                         src={marca.logo_url}
                                         alt={marca.nombre}
-                                        className="max-w-full max-h-full object-contain"
+                                        className="max-w-full max-h-32 object-contain"
                                     />
                                 </div>
                             ) : (
-                                <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-400 text-xl">{marca.nombre[0]}</span>
+                                <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
+                                    {/* Placeholder for missing logo, using yellow dot from reference somewhat */}
                                 </div>
                             )}
-                            <h2 className="text-2xl font-bold text-blue-900">
-                                {marca.nombre}
-                            </h2>
                         </div>
+
+
                     </Link>
                 ))}
             </div>

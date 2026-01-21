@@ -12,17 +12,26 @@ async function seed() {
 
     // Clear existing data
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    await connection.query('TRUNCATE TABLE respuestas_participantes');
-    await connection.query('TRUNCATE TABLE participaciones');
-    await connection.query('TRUNCATE TABLE respuestas');
-    await connection.query('TRUNCATE TABLE preguntas');
-    await connection.query('TRUNCATE TABLE usuarios');
-    await connection.query('TRUNCATE TABLE marcas_bayer');
-    await connection.query('TRUNCATE TABLE ubicaciones');
-    await connection.query('TRUNCATE TABLE puntos_venta');
-    await connection.query('TRUNCATE TABLE paises');
+    const tablesToDrop = [
+      'logs_actividades', 'logs_ingresos', 'respuestas_participantes',
+      'participaciones', 'respuestas', 'preguntas', 'usuarios',
+      'marcas_bayer', 'ubicaciones', 'puntos_venta', 'paises'
+    ];
+    for (const table of tablesToDrop) {
+      await connection.query(`DROP TABLE IF EXISTS ${table}`);
+    }
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
-    console.log('Tables truncated');
+    console.log('Tables dropped');
+
+    // Re-run schema locally
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const schemaPath = path.join(process.cwd(), 'database', 'schema.sql');
+    let schemaSql = await fs.readFile(schemaPath, 'utf-8');
+    schemaSql = schemaSql.replace(/CREATE DATABASE IF NOT EXISTS.*;/g, '');
+    schemaSql = schemaSql.replace(/USE.*;/g, '');
+    await connection.query(schemaSql);
+    console.log('Schema re-applied');
 
     // Insert Paises
     await connection.query(`
@@ -50,14 +59,14 @@ async function seed() {
 
     // Insert Marcas Bayer
     await connection.query(`
-      INSERT INTO marcas_bayer (id, nombre, pais_id, imagen_url) VALUES 
+      INSERT INTO marcas_bayer (id, nombre, pais_id, logo_url) VALUES 
       (1, 'Aspirina', 1, '/images/aspirina.png'),
       (2, 'Alka-Seltzer', 1, '/images/alka.png'),
       (3, 'Tabcin', 1, '/images/tabcin.png')
     `);
 
     // Insert Users (Promotor)
-    const passwordHash = await bcrypt.hash('123456', 10);
+    const passwordHash = await bcrypt.hash('admin123', 10);
     await connection.query(`
       INSERT INTO usuarios (nombre, email, password_hash, rol, pais_id) VALUES 
       ('Promotor CR', 'promotor@bayer.com', ?, 'promotor', 1),

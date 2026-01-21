@@ -13,11 +13,12 @@ interface GameContainerProps {
     paisId: string;
     marcaBayerId: string;
     totalParticipants: number;
+    marcaLogoUrl?: string;
 }
 
 type GameState = 'READY' | 'SPINNING' | 'QUESTION' | 'FEEDBACK' | 'FINISHED' | 'NEXT_PARTICIPANT';
 
-export default function GameContainer({ preguntas, paisId, marcaBayerId, totalParticipants }: GameContainerProps) {
+export default function GameContainer({ preguntas, paisId, marcaBayerId, totalParticipants, marcaLogoUrl }: GameContainerProps) {
     const [gameState, setGameState] = useState<GameState>('READY');
     const [currentParticipant, setCurrentParticipant] = useState(1);
     const [currentRound, setCurrentRound] = useState(1);
@@ -160,28 +161,43 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
     return (
         <div className="relative flex flex-col items-center justify-center w-full max-w-4xl mx-auto min-h-[600px]">
             {/* Header Left - Participant Info */}
-            <div className="absolute top-6 left-6 z-20">
-                <div className="bg-blue-600/90 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-lg border border-blue-400/30 backdrop-blur-md">
-                    <Users className="w-6 h-6" />
-                    <span className="font-bold text-lg">Participante {currentParticipant} de {totalParticipants}</span>
-                </div>
-            </div>
-
-            {/* Header Right - Game Stats */}
-            {gameState !== 'FINISHED' && gameState !== 'NEXT_PARTICIPANT' && (
-                <div className="absolute top-6 right-6 flex flex-col items-end gap-4 text-white font-bold text-xl z-20">
-                    <div className="bg-white/20 px-6 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10">
-                        Ronda {currentRound}/3
-                    </div>
-                    <div className="bg-green-500/90 px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-transform border border-green-400/30">
-                        Aciertos: {score}
+            {gameState !== 'FINISHED' && (
+                <div className="absolute top-6 left-6 z-20">
+                    <div className="bg-blue-600/90 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-lg border border-blue-400/30 backdrop-blur-md">
+                        <Users className="w-6 h-6" />
+                        <span className="font-bold text-lg">Participante {currentParticipant} de {totalParticipants}</span>
                     </div>
                 </div>
             )}
 
+            {/* Header Right - Game Stats */}
+            {gameState !== 'FINISHED' && gameState !== 'NEXT_PARTICIPANT' && (
+                <>
+                    {/* Center - Round */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
+                        <div className="bg-white/20 px-8 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10 text-white font-bold text-xl">
+                            Ronda {currentRound}/3
+                        </div>
+                    </div>
+
+                    {/* Right - Score */}
+                    <div className="absolute top-6 right-6 z-20">
+                        <div className="bg-green-500/90 px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-transform border border-green-400/30 text-white font-bold text-xl">
+                            Aciertos: {score}
+                        </div>
+                    </div>
+                </>
+            )}
+
             {/* Game States */}
             {gameState === 'READY' && (
-                <div className="text-center space-y-8 animate-in fade-in zoom-in mt-20">
+                <div className="text-center space-y-4 animate-in fade-in zoom-in mt-32">
+                    {/* Brand Logo */}
+                    {marcaLogoUrl && (
+                        <div className="mx-auto w-32 h-32 flex items-center justify-center mb-4">
+                            <img src={marcaLogoUrl} alt="Marca" className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                        </div>
+                    )}
                     <div className="relative inline-block">
                         <h2 className="text-5xl font-black text-white mb-2 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] tracking-tight">
                             ¡ES TU TURNO!
@@ -199,7 +215,7 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
             )}
 
             {gameState === 'SPINNING' && (
-                <div className="text-center space-y-8">
+                <div className="text-center space-y-8 mt-32">
                     <Wheel onSpinEnd={handleSpinEnd} spinning={true} />
                     <p className="text-2xl text-white font-bold animate-pulse">
                         Girando...
@@ -208,11 +224,13 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
             )}
 
             {(gameState === 'QUESTION' || gameState === 'FEEDBACK') && shuffledQuestions[currentQuestionIndex] && (
-                <QuestionCard
-                    question={shuffledQuestions[currentQuestionIndex]}
-                    onAnswer={handleAnswer}
-                    timeLeft={timeLeft}
-                />
+                <div className="mt-32 w-full max-w-2xl">
+                    <QuestionCard
+                        question={shuffledQuestions[currentQuestionIndex]}
+                        onAnswer={handleAnswer}
+                        timeLeft={timeLeft}
+                    />
+                </div>
             )}
 
             {/* Debug: Show if question is missing */}
@@ -251,39 +269,45 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
             )}
 
             {gameState === 'FINISHED' && (
-                <div className="bg-white rounded-3xl p-12 text-center shadow-2xl animate-in fade-in zoom-in max-w-2xl w-full">
-                    <Trophy className="w-24 h-24 text-yellow-500 mx-auto mb-6" />
-                    <h2 className="text-4xl font-bold text-blue-900 mb-8">¡Juego Completado!</h2>
-
-                    <div className="grid gap-4 mb-8 max-h-60 overflow-y-auto">
-                        {results.map((result) => (
-                            <div key={result.participant} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <span className="font-bold text-gray-700">Participante {result.participant}</span>
-                                <div className="flex items-center gap-4">
-                                    <span className="text-gray-600">{result.score}/3 Aciertos</span>
-                                    <span className={`font-bold px-3 py-1 rounded-full text-sm ${result.gano ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                        }`}>
-                                        {result.gano ? 'GANÓ' : 'PERDIÓ'}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
+                <div className="flex flex-col items-center gap-8 w-full max-w-3xl">
+                    {/* Centered Participant Info Pill */}
+                    <div className="bg-blue-800/40 text-blue-100 px-8 py-3 rounded-full border border-blue-400/20 backdrop-blur-md font-medium text-lg">
+                        Participante {currentParticipant} de {totalParticipants}
                     </div>
 
-                    <div className="flex justify-center gap-4">
-                        <button
-                            onClick={handleRestart}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl transition-colors"
-                        >
-                            <RefreshCw className="w-5 h-5" />
-                            Nuevo Juego
-                        </button>
-                        <Link
-                            href="/"
-                            className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors"
-                        >
-                            Salir
-                        </Link>
+                    <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 text-center shadow-2xl animate-in fade-in zoom-in w-full border border-white/60">
+                        <Trophy className="w-28 h-28 text-yellow-400 mx-auto mb-8 drop-shadow-md" />
+                        <h2 className="text-5xl font-bold text-[#1e40af] mb-12 drop-shadow-sm">¡Juego Completado!</h2>
+
+                        <div className="grid gap-4 mb-12 max-h-80 overflow-y-auto px-2">
+                            {results.map((result) => (
+                                <div key={result.participant} className="flex items-center justify-between p-6 bg-white rounded-2xl shadow-sm border border-white/50">
+                                    <span className="font-bold text-xl text-gray-900">Participante {result.participant}</span>
+                                    <div className="flex items-center gap-6">
+                                        <span className="text-gray-600 font-medium">{result.score}/3 Aciertos</span>
+                                        <span className={`font-bold px-6 py-2 rounded-full text-base shadow-sm ${result.gano ? 'bg-[#dcfce7] text-[#15803d]' : 'bg-[#fee2e2] text-[#b91c1c]'
+                                            }`}>
+                                            {result.gano ? 'Ganó' : 'Perdió'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-center gap-6">
+                            <button
+                                onClick={handleRestart}
+                                className="bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-lg px-12 py-4 rounded-full transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                            >
+                                Nuevo Juego
+                            </button>
+                            <Link
+                                href="/"
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold text-lg px-12 py-4 rounded-full transition-all shadow-sm hover:shadow-md"
+                            >
+                                Salir
+                            </Link>
+                        </div>
                     </div>
                 </div>
             )}

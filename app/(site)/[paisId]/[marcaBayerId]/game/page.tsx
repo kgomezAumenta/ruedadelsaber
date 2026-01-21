@@ -1,5 +1,6 @@
 import GameContainer from '@/components/Game/GameContainer';
 import { getPreguntasByMarcaBayer } from '@/models/Juego';
+import { getMarcaBayerById } from '@/models/Catalogos';
 import { redirect } from 'next/navigation';
 
 export default async function GamePage({
@@ -21,6 +22,8 @@ export default async function GamePage({
         redirect('/');
     }
 
+    const marca = await getMarcaBayerById(marcaBayerId);
+
     // Fetch questions server-side
     const preguntas = await getPreguntasByMarcaBayer(paisId, marcaBayerId);
 
@@ -31,6 +34,7 @@ export default async function GamePage({
                 paisId={paisIdStr}
                 marcaBayerId={marcaBayerIdStr}
                 totalParticipants={totalParticipants}
+                marcaLogoUrl={marca?.logo_url}
             />
         </div>
     );

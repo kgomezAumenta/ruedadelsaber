@@ -27,6 +27,18 @@ async function deploy() {
         schemaSql = schemaSql.replace(/CREATE DATABASE IF NOT EXISTS.*;/g, '');
         schemaSql = schemaSql.replace(/USE.*;/g, '');
 
+        console.log('Dropping existing tables for clean migration...');
+        await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+        const tablesToDrop = [
+            'logs_actividades', 'logs_ingresos', 'respuestas_participantes',
+            'participaciones', 'respuestas', 'preguntas', 'usuarios',
+            'marcas_bayer', 'ubicaciones', 'marcas', 'grupos', 'puntos_venta', 'paises'
+        ];
+        for (const table of tablesToDrop) {
+            await connection.query(`DROP TABLE IF EXISTS ${table}`);
+        }
+        await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+
         console.log('Executing schema...');
         await connection.query(schemaSql);
         console.log('Schema executed successfully!');
@@ -79,7 +91,7 @@ async function deploy() {
         `);
 
         // Insert Users
-        const passwordHash = await bcrypt.hash('123456', 10);
+        const passwordHash = await bcrypt.hash('admin123', 10);
         await connection.query(`
             INSERT INTO usuarios (nombre, email, password_hash, rol, pais_id) VALUES 
             ('Promotor CR', 'promotor@bayer.com', ?, 'promotor', 1),
