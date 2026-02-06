@@ -30,7 +30,7 @@ export default async function BrandSelection({ params }: { params: Promise<{ pai
                     <Link
                         key={marca.id}
                         href={`/${paisId}/${marca.id}/login`}
-                        className="group relative overflow-hidden rounded-xl bg-[#8B2D78] bg-gradient-to-br from-purple-800 to-pink-700 p-8 hover:scale-105 transition-all duration-300 shadow-lg flex flex-col items-center justify-between aspect-square border border-white/10"
+                        className="group relative overflow-hidden rounded-xl bg-gradient-to-b from-[#2563EB] to-[#60A5FA] p-8 hover:scale-105 transition-all duration-300 shadow-lg flex flex-col items-center justify-between aspect-square border border-white/10"
                     >
                         <div className="w-full flex-1 flex items-center justify-center p-4">
                             {marca.logo_url ? (
