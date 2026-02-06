@@ -38,23 +38,32 @@ export default function Wheel({ onSpinEnd, spinning }: WheelProps) {
                 style={{ transform: `rotate(${rotation}deg)` }}
             >
                 <div className="relative w-full h-full bg-gradient-to-br from-blue-500 to-blue-700">
-                    {/* Segments - simplified for now */}
-                    {[...Array(8)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute top-0 left-1/2 w-1/2 h-1/2 origin-bottom-left border-b border-white/20"
-                            style={{
-                                transform: `rotate(${i * 45}deg) skewY(-45deg)`,
-                                backgroundColor: i % 2 === 0 ? '#3b82f6' : '#1d4ed8'
-                            }}
-                        >
-                            <span
-                                className="absolute left-8 top-12 text-white font-bold text-2xl transform -skewY(45deg) rotate(-22.5deg)"
+                    {/* Segments */}
+                    {[...Array(8)].map((_, i) => {
+                        const colors = ['#3b82f6', '#22c55e', '#a855f7', '#ffffff', '#f97316'];
+                        const color = colors[i % colors.length];
+                        const isWhite = color === '#ffffff';
+
+                        return (
+                            <div
+                                key={i}
+                                className="absolute top-0 left-1/2 w-1/2 h-1/2 origin-bottom-left border-b border-white/20"
+                                style={{
+                                    transform: `rotate(${i * 45}deg) skewY(-45deg)`,
+                                    backgroundColor: color
+                                }}
                             >
-                                ?
-                            </span>
-                        </div>
-                    ))}
+                                <span
+                                    className={cn(
+                                        "absolute left-8 top-12 font-bold text-2xl transform -skewY(45deg) rotate(-22.5deg)",
+                                        isWhite ? "text-black" : "text-white"
+                                    )}
+                                >
+                                    ?
+                                </span>
+                            </div>
+                        );
+                    })}
 
                     {/* Center Hub */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center z-10">
