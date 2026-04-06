@@ -67,6 +67,19 @@ export async function POST(request: NextRequest) {
                 }
                 const marcaBayerId = marcaRows[0].id;
 
+                // Check if question exists
+                const [existingPregunta] = await connection.query<RowDataPacket[]>(
+                    'SELECT id FROM preguntas WHERE texto = ? AND pais_id = ?',
+                    [Pregunta, paisId]
+                );
+
+                if (existingPregunta.length > 0) {
+                    console.log(`Row ${index + 1}: Pregunta already exists: ${Pregunta}`);
+                    skippedCount++;
+                    errors.push(`Fila ${index + 1}: La pregunta ya existe para "${Pais}"`);
+                    continue;
+                }
+
                 // Insert Question
                 const [questionResult] = await connection.query<ResultSetHeader>(
                     'INSERT INTO preguntas (texto, pais_id, marca_bayer_id) VALUES (?, ?, ?)',
