@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Globe, Users, HelpCircle, LogOut, ShoppingBag, MapPin, Award } from 'lucide-react';
+import { LayoutDashboard, Globe, Users, HelpCircle, LogOut, ShoppingBag, MapPin, Award, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -13,6 +13,7 @@ const navItems = [
     { label: 'Marcas Bayer', icon: Award, href: '/dashboard/marcas-bayer' },
     { label: 'Preguntas', icon: HelpCircle, href: '/dashboard/preguntas' },
     { label: 'Usuarios', icon: Users, href: '/dashboard/usuarios' },
+    { label: 'Importar Datos', icon: FileSpreadsheet, href: '/dashboard/importador' },
 ];
 
 export default function AdminSidebar() {

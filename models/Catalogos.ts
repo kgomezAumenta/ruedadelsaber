@@ -1,5 +1,5 @@
 import pool from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { Pais, PuntoVenta, Ubicacion, MarcaBayer } from './types';
 
 export async function getPaises(): Promise<Pais[]> {
@@ -25,4 +25,41 @@ export async function getMarcasBayer(paisId: number): Promise<MarcaBayer[]> {
 export async function getMarcaBayerById(id: number): Promise<MarcaBayer | null> {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM marcas_bayer WHERE id = ?', [id]);
     return (rows[0] as MarcaBayer) || null;
+}
+
+export async function getPaisByNombre(nombre: string): Promise<Pais | null> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM paises WHERE LOWER(nombre) = LOWER(?)', [nombre]);
+    return (rows[0] as Pais) || null;
+}
+
+export async function getPuntoVentaByNombreAndPais(nombre: string, paisId: number): Promise<PuntoVenta | null> {
+    const [rows] = await pool.query<RowDataPacket[]>(
+        'SELECT * FROM puntos_venta WHERE LOWER(nombre) = LOWER(?) AND pais_id = ?',
+        [nombre, paisId]
+    );
+    return (rows[0] as PuntoVenta) || null;
+}
+
+export async function createPuntoVenta(nombre: string, paisId: number): Promise<number> {
+    const [result] = await pool.query<ResultSetHeader>(
+        'INSERT INTO puntos_venta (nombre, pais_id) VALUES (?, ?)',
+        [nombre, paisId]
+    );
+    return result.insertId;
+}
+
+export async function getUbicacionByNombreAndPunto(nombre: string, puntoVentaId: number): Promise<Ubicacion | null> {
+    const [rows] = await pool.query<RowDataPacket[]>(
+        'SELECT * FROM ubicaciones WHERE LOWER(nombre) = LOWER(?) AND punto_venta_id = ?',
+        [nombre, puntoVentaId]
+    );
+    return (rows[0] as Ubicacion) || null;
+}
+
+export async function createUbicacion(nombre: string, puntoVentaId: number): Promise<number> {
+    const [result] = await pool.query<ResultSetHeader>(
+        'INSERT INTO ubicaciones (nombre, punto_venta_id) VALUES (?, ?)',
+        [nombre, puntoVentaId]
+    );
+    return result.insertId;
 }
