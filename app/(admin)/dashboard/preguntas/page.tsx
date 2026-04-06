@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import DataTable from '@/components/Admin/DataTable';
 import Modal from '@/components/Admin/Modal';
-import { Plus, Check, X, FileSpreadsheet, Upload } from 'lucide-react';
+import { Plus, Check, X, FileSpreadsheet, Upload, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface Respuesta {
     texto: string;
@@ -163,6 +164,32 @@ export default function PreguntasPage() {
         setFormData({ ...formData, respuestas: newRespuestas });
     };
 
+    const handleExport = () => {
+        if (preguntas.length === 0) {
+            alert('No hay preguntas para exportar');
+            return;
+        }
+
+        const exportData = preguntas.map(p => {
+            const correcta = p.respuestas?.find(r => r.es_correcta)?.texto || '';
+            const incorrectas = p.respuestas?.filter(r => !r.es_correcta).map(r => r.texto).join(', ') || '';
+            
+            return {
+                'ID': p.id,
+                'País': p.pais_nombre,
+                'Marca Bayer': p.marca_bayer_nombre,
+                'Pregunta': p.texto,
+                'Respuesta Correcta': correcta,
+                'Respuestas Incorrectas': incorrectas
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Preguntas');
+        XLSX.writeFile(workbook, 'Preguntas_Bayer.xlsx');
+    };
+
     const columns = [
         { header: 'Pregunta', accessor: 'texto' as keyof Pregunta },
         { header: 'País', accessor: 'pais_nombre' as keyof Pregunta },
@@ -191,6 +218,13 @@ export default function PreguntasPage() {
                     <p className="text-gray-500 mt-2">Gestión de preguntas y respuestas</p>
                 </div>
                 <div className="flex gap-3">
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors shadow-md"
+                    >
+                        <Download className="w-5 h-5" />
+                        Exportar Excel
+                    </button>
                     <a
                         href="/api/admin/preguntas/template"
                         className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors shadow-md"
