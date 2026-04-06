@@ -30,8 +30,8 @@ export async function POST(request: Request) {
             let rol = row.rol || 'promotor'; // Default role
             rol = rol.toLowerCase();
 
-            if (!pais || !nombreUsuario || !email || !password) {
-                errors.push(`Fila ${i + 1}: Faltan campos obligatorios (País, Nombre, Email, Contraseña son requeridos).`);
+            if (!pais) {
+                errors.push(`Fila ${i + 1}: El campo "País" es obligatorio para cualquier importación.`);
                 continue;
             }
 
@@ -81,26 +81,32 @@ export async function POST(request: Request) {
                     }
                 }
 
-                // 4. Validate or Create User
-                const existingUser = await getUserByEmail(email.trim());
-                if (existingUser) {
-                    skipCount++;
-                    continue; // Skip if user exists
+                // 4. Validate or Create User (Opcional, solo si hay datos de usuario)
+                if (nombreUsuario && email && password) {
+                    const existingUser = await getUserByEmail(email.toString().trim());
+                    if (existingUser) {
+                        skipCount++;
+                        // Continue to next row even if user exists since we already created the catalogs
+                        continue; 
+                    }
+
+                    const password_hash = await bcrypt.hash(password.toString(), 10);
+
+                    await createUser({
+                        nombre: nombreUsuario.toString().trim(),
+                        email: email.toString().trim(),
+                        password_hash,
+                        rol: rol as 'admin' | 'promotor' | 'editor',
+                        pais_id: paisId,
+                        punto_venta_id: puntoVentaId || undefined,
+                        ubicacion_id: ubicacionId || undefined
+                    });
+
+                    successCount++;
+                } else {
+                    // Solo importó ubicación / punto, lo contamos como éxito de fila
+                    successCount++;
                 }
-
-                const password_hash = await bcrypt.hash(password.toString(), 10);
-
-                await createUser({
-                    nombre: nombreUsuario.trim(),
-                    email: email.trim(),
-                    password_hash,
-                    rol: rol as 'admin' | 'promotor' | 'editor',
-                    pais_id: paisId,
-                    punto_venta_id: puntoVentaId || undefined,
-                    ubicacion_id: ubicacionId || undefined
-                });
-
-                successCount++;
             } catch (err: any) {
                 console.error(`Error processing row ${i + 1}:`, err);
                 errors.push(`Fila ${i + 1}: Falló al importar debido a un error interno.`);

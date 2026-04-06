@@ -82,7 +82,8 @@ export default function ImportadorPage() {
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                 <p className="text-gray-600 mb-6">
-                    Sube un archivo de Excel (.xlsx, .csv) para importar Puntos de Venta, Ubicaciones y Usuarios simultáneamente. Las columnas obligatorias son: <strong>País, Punto de Venta, Ubicación, Nombre Usuario, Email, y Contraseña.</strong>
+                    Sube un archivo de Excel (.xlsx, .csv) para importar Puntos de Venta, Ubicaciones y Usuarios simultáneamente. <br/> 
+                    <strong>Nota:</strong> Solo la columna País es 100% obligatoria. Puedes omitir cualquier otra columna para crear solo lo que necesites jerárquicamente.
                 </p>
 
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors">
