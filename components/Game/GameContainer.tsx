@@ -94,7 +94,7 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
     const nextRound = async () => {
         const currentScore = scoreRef.current;
         if (currentRound >= 3) {
-            const gano = currentScore >= 2;
+            const gano = currentScore === 3;
 
             // Save results for current participant
             try {
@@ -243,19 +243,19 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
 
             {gameState === 'NEXT_PARTICIPANT' && (
                 <div className="bg-white rounded-3xl p-12 text-center shadow-2xl animate-in fade-in zoom-in max-w-2xl w-full">
-                    {score >= 2 ? (
+                    {score === 3 ? (
                         <Trophy className="w-24 h-24 text-yellow-500 mx-auto mb-6" />
                     ) : (
                         <Frown className="w-24 h-24 text-blue-300 mx-auto mb-6" />
                     )}
                     <h2 className="text-4xl font-bold text-blue-900 mb-4">
-                        {score >= 2 ? '¡Felicidades!' : 'Buen intento'}
+                        {score === 3 ? '¡Felicidades!' : 'Buen intento'}
                     </h2>
                     <p className="text-xl text-gray-600 mb-8">
                         Participante {currentParticipant} ha terminado con {score} aciertos.
                         <br />
-                        <span className={`font-bold ${score >= 2 ? 'text-green-600' : 'text-red-500'}`}>
-                            {score >= 2 ? '¡GANASTE!' : 'No ganaste esta vez'}
+                        <span className={`font-bold ${score === 3 ? 'text-green-600' : 'text-red-500'}`}>
+                            {score === 3 ? '¡GANASTE!' : 'No ganaste esta vez'}
                         </span>
                     </p>
                     <button
