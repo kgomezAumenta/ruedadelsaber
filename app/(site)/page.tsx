@@ -10,10 +10,10 @@ export default async function Home() {
 
     return (
         <div className="flex flex-col items-center w-full max-w-6xl mx-auto px-4">
-            {/* Logo Placeholder */}
+            {/* Logo */}
             <div className="mb-8">
-                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-blue-200">
-                    <span className="text-blue-600 font-bold text-xs text-center leading-tight">BAYER</span>
+                <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center border-4 border-blue-200 overflow-hidden shadow-lg">
+                    <img src="/LogoBayer.jpeg" alt="Logo Bayer" className="w-full h-full object-cover" />
                 </div>
             </div>
 

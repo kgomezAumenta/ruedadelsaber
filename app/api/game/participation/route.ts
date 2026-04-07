@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createParticipacion, updateParticipacion } from '@/models/Juego';
+import { getUserById } from '@/models/Usuarios';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
@@ -19,11 +20,19 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid Marca Bayer ID' }, { status: 400 });
         }
 
+        const user = await getUserById(userId);
+
         // In a real scenario, we would create the participation at start and update it at end.
         // For simplicity, we create it here or just record it.
         // The model has createParticipacion and updateParticipacion.
 
-        const id = await createParticipacion(userId, marcaId, numero_participante || 1);
+        const id = await createParticipacion(
+            userId, 
+            marcaId, 
+            numero_participante || 1, 
+            user?.punto_venta_id || null, 
+            user?.ubicacion_id || null
+        );
         await updateParticipacion(id, aciertos, gano);
 
         return NextResponse.json({ success: true, id });

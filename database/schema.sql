@@ -79,8 +79,12 @@ CREATE TABLE IF NOT EXISTS participaciones (
     aciertos INT DEFAULT 0,
     gano BOOLEAN DEFAULT FALSE,
     numero_participante INT DEFAULT 1,
+    punto_venta_id INT,
+    ubicacion_id INT,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (marca_bayer_id) REFERENCES marcas_bayer(id) ON DELETE SET NULL
+    FOREIGN KEY (marca_bayer_id) REFERENCES marcas_bayer(id) ON DELETE SET NULL,
+    FOREIGN KEY (punto_venta_id) REFERENCES puntos_venta(id) ON DELETE SET NULL,
+    FOREIGN KEY (ubicacion_id) REFERENCES ubicaciones(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS respuestas_participantes (

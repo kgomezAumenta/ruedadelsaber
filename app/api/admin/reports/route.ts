@@ -23,8 +23,8 @@ export async function GET(request: Request) {
         FROM participaciones p
         JOIN usuarios u ON p.usuario_id = u.id
         LEFT JOIN paises pa ON u.pais_id = pa.id
-        LEFT JOIN puntos_venta pv ON u.punto_venta_id = pv.id
-        LEFT JOIN ubicaciones ub ON u.ubicacion_id = ub.id
+        LEFT JOIN puntos_venta pv ON COALESCE(p.punto_venta_id, u.punto_venta_id) = pv.id
+        LEFT JOIN ubicaciones ub ON COALESCE(p.ubicacion_id, u.ubicacion_id) = ub.id
         LEFT JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
         ORDER BY p.fecha DESC
       `);
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       SELECT pv.nombre, COUNT(*) as count 
       FROM participaciones p
       JOIN usuarios u ON p.usuario_id = u.id
-      JOIN puntos_venta pv ON u.punto_venta_id = pv.id
+      JOIN puntos_venta pv ON COALESCE(p.punto_venta_id, u.punto_venta_id) = pv.id
       GROUP BY pv.nombre
     `);
 
