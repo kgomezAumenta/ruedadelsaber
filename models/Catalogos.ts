@@ -7,6 +7,11 @@ export async function getPaises(): Promise<Pais[]> {
     return rows as Pais[];
 }
 
+export async function getPaisById(id: number): Promise<Pais | null> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM paises WHERE id = ?', [id]);
+    return (rows[0] as Pais) || null;
+}
+
 export async function getPuntosVenta(paisId: number): Promise<PuntoVenta[]> {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM puntos_venta WHERE pais_id = ? ORDER BY nombre', [paisId]);
     return rows as PuntoVenta[];

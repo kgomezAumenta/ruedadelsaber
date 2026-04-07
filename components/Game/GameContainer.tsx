@@ -11,6 +11,7 @@ import confetti from 'canvas-confetti';
 interface GameContainerProps {
     preguntas: Pregunta[];
     paisId: string;
+    paisNombre?: string;
     marcaBayerId: string;
     totalParticipants: number;
     marcaLogoUrl?: string;
@@ -18,7 +19,7 @@ interface GameContainerProps {
 
 type GameState = 'READY' | 'SPINNING' | 'QUESTION' | 'FEEDBACK' | 'FINISHED' | 'NEXT_PARTICIPANT';
 
-export default function GameContainer({ preguntas, paisId, marcaBayerId, totalParticipants, marcaLogoUrl }: GameContainerProps) {
+export default function GameContainer({ preguntas, paisId, paisNombre, marcaBayerId, totalParticipants, marcaLogoUrl }: GameContainerProps) {
     const [gameState, setGameState] = useState<GameState>('READY');
     const [currentParticipant, setCurrentParticipant] = useState(1);
     const [currentRound, setCurrentRound] = useState(1);
@@ -175,8 +176,9 @@ export default function GameContainer({ preguntas, paisId, marcaBayerId, totalPa
                 <>
                     {/* Center - Round */}
                     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-white/20 px-8 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10 text-white font-bold text-xl">
-                            Ronda {currentRound}/3
+                        <div className="bg-white/20 px-8 py-3 rounded-full backdrop-blur-sm shadow-sm border border-white/10 text-white font-bold text-xl flex flex-col items-center">
+                            <span>Ronda {currentRound}/3</span>
+                            {paisNombre && <span className="text-sm font-normal opacity-80">{paisNombre}</span>}
                         </div>
                     </div>
 
