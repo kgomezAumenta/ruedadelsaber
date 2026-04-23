@@ -29,13 +29,13 @@ export async function POST(request: NextRequest) {
             console.log(`Processing ${rows.length} rows from Excel`);
 
             for (const [index, row] of rows.entries()) {
-                // Expected columns: Pregunta, Pais, Marca, Respuesta1, Respuesta2, Respuesta3, Correcta (1, 2, or 3)
+                // Expected columns: Pregunta, Pais, Marca, Respuesta1, Respuesta2, Respuesta3 (optional), Correcta (1, 2, or 3)
                 let { Pregunta, Pais, Marca, Respuesta1, Respuesta2, Respuesta3, Correcta } = row;
 
-                if (!Pregunta || !Pais || !Marca || !Respuesta1 || !Respuesta2 || !Respuesta3 || !Correcta) {
+                if (!Pregunta || !Pais || !Marca || !Respuesta1 || !Respuesta2 || !Correcta) {
                     console.log(`Row ${index + 1}: Missing required fields`, row);
                     skippedCount++;
-                    errors.push(`Fila ${index + 1}: Faltan campos requeridos`);
+                    errors.push(`Fila ${index + 1}: Faltan campos requeridos (Pregunta, Pais, Marca, Respuesta1, Respuesta2 o Correcta)`);
                     continue;
                 }
 
@@ -87,17 +87,20 @@ export async function POST(request: NextRequest) {
                 );
                 const questionId = questionResult.insertId;
 
-                // Insert Answers
+                // Insert Answers (Only those that have text)
                 const answers = [
-                    { texto: Respuesta1, es_correcta: Correcta === 1 },
-                    { texto: Respuesta2, es_correcta: Correcta === 2 },
-                    { texto: Respuesta3, es_correcta: Correcta === 3 },
+                    { texto: Respuesta1, es_correcta: Correcta === 1 || Correcta === '1' },
+                    { texto: Respuesta2, es_correcta: Correcta === 2 || Correcta === '2' },
                 ];
+                
+                if (Respuesta3 && String(Respuesta3).trim() !== '') {
+                    answers.push({ texto: Respuesta3, es_correcta: Correcta === 3 || Correcta === '3' });
+                }
 
                 for (const answer of answers) {
                     await connection.query(
                         'INSERT INTO respuestas (pregunta_id, texto, es_correcta) VALUES (?, ?, ?)',
-                        [questionId, answer.texto, answer.es_correcta]
+                        [questionId, String(answer.texto).trim(), answer.es_correcta]
                     );
                 }
                 importedCount++;

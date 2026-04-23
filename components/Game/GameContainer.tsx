@@ -32,9 +32,18 @@ export default function GameContainer({ preguntas, paisId, paisNombre, marcaBaye
     const [results, setResults] = useState<{ participant: number; score: number; gano: boolean }[]>([]);
 
     const shuffleQuestions = () => {
-        // Shuffle questions and take 3 random ones
-        const shuffled = [...preguntas].sort(() => Math.random() - 0.5).slice(0, 3);
-        setShuffledQuestions(shuffled);
+        // Filter questions that have at least 2 answers (to allow True/False and Multiple Choice)
+        const validPreguntas = preguntas.filter(p => p.respuestas && p.respuestas.length >= 2);
+        
+        if (validPreguntas.length < 3) {
+            console.error('Not enough valid questions (need 3, found ' + validPreguntas.length + ')');
+            // If we don't have enough valid ones, we'll have to use what we have but this is a problem
+            setShuffledQuestions([...preguntas].sort(() => Math.random() - 0.5).slice(0, 3));
+        } else {
+            // Shuffle questions and take 3 random ones
+            const shuffled = [...validPreguntas].sort(() => Math.random() - 0.5).slice(0, 3);
+            setShuffledQuestions(shuffled);
+        }
     };
 
     // Initialize questions on mount or when participant changes
