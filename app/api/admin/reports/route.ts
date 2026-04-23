@@ -28,9 +28,9 @@ export async function GET(request: Request) {
         FROM participaciones p
         JOIN usuarios u ON p.usuario_id = u.id
         LEFT JOIN paises pa ON u.pais_id = pa.id
+        LEFT JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
         LEFT JOIN puntos_venta pv ON COALESCE(p.punto_venta_id, u.punto_venta_id) = pv.id
         LEFT JOIN ubicaciones ub ON COALESCE(p.ubicacion_id, u.ubicacion_id) = ub.id
-        LEFT JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
         WHERE 1=1
       `;
       
@@ -64,7 +64,9 @@ export async function GET(request: Request) {
         SELECT 
           pa.nombre as Pais,
           pv.nombre as PuntoVenta,
+          ub.nombre as Ubicacion,
           u.nombre as Promotor,
+          mb.nombre as MarcaBayer,
           pr.texto as Pregunta,
           r_dada.texto as RespuestaDada,
           r_correcta.texto as RespuestaCorrecta,
@@ -73,7 +75,9 @@ export async function GET(request: Request) {
         JOIN participaciones p ON rp.participacion_id = p.id
         JOIN usuarios u ON p.usuario_id = u.id
         JOIN paises pa ON u.pais_id = pa.id
+        LEFT JOIN marcas_bayer mb ON p.marca_bayer_id = mb.id
         LEFT JOIN puntos_venta pv ON COALESCE(p.punto_venta_id, u.punto_venta_id) = pv.id
+        LEFT JOIN ubicaciones ub ON COALESCE(p.ubicacion_id, u.ubicacion_id) = ub.id
         JOIN preguntas pr ON rp.pregunta_id = pr.id
         JOIN respuestas r_dada ON rp.respuesta_id = r_dada.id
         JOIN respuestas r_correcta ON pr.id = r_correcta.pregunta_id AND r_correcta.es_correcta = TRUE
