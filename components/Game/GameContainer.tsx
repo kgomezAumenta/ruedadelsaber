@@ -38,7 +38,6 @@ export default function GameContainer({
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(15);
     const [shuffledQuestions, setShuffledQuestions] = useState<Pregunta[]>([]);
-    const [userAnswers, setUserAnswers] = useState<{pregunta_id: number, respuesta_id: number | null, es_correcta: boolean}[]>([]);
     
     const selectedQuestion = shuffledQuestions[currentQuestionIndex];
 
@@ -66,10 +65,12 @@ export default function GameContainer({
     }, [currentParticipant]);
 
     const scoreRef = useRef(0);
+    const answersRef = useRef<{pregunta_id: number, respuesta_id: number | null, es_correcta: boolean}[]>([]);
 
     useEffect(() => {
         scoreRef.current = score;
     }, [score]);
+
 
     // Timer logic
     useEffect(() => {
@@ -104,11 +105,11 @@ export default function GameContainer({
         }
 
         if (selectedQuestion) {
-            setUserAnswers(prev => [...prev, {
+            answersRef.current.push({
                 pregunta_id: selectedQuestion.id,
                 respuesta_id: respuesta.id,
                 es_correcta: respuesta.es_correcta
-            }]);
+            });
         }
 
         setTimeout(() => {
@@ -120,11 +121,11 @@ export default function GameContainer({
         setGameState('FEEDBACK');
         
         if (selectedQuestion) {
-            setUserAnswers(prev => [...prev, {
+            answersRef.current.push({
                 pregunta_id: selectedQuestion.id,
                 respuesta_id: null,
                 es_correcta: false
-            }]);
+            });
         }
 
         setTimeout(() => {
@@ -149,12 +150,12 @@ export default function GameContainer({
                         numero_participante: currentParticipant,
                         punto_venta_id: puntoVentaId,
                         ubicacion_id: ubicacionId,
-                        respuestas: userAnswers
+                        respuestas: answersRef.current
                     }),
                 });
                 
                 // Clear answers for next participant
-                setUserAnswers([]);
+                answersRef.current = [];
             } catch (e) {
                 console.error(e);
             }
