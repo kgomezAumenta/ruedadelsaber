@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
         const { payload } = await jwtVerify(token, JWT_SECRET);
         const userId = payload.userId as number;
 
-        const { aciertos, gano, marca_bayer_id, numero_participante } = await request.json();
+        const { aciertos, gano, marca_bayer_id, numero_participante, punto_venta_id, ubicacion_id, respuestas } = await request.json();
         const marcaId = parseInt(marca_bayer_id);
 
         if (isNaN(marcaId)) {
@@ -30,10 +30,23 @@ export async function POST(request: NextRequest) {
             userId, 
             marcaId, 
             numero_participante || 1, 
-            user?.punto_venta_id || null, 
-            user?.ubicacion_id || null
+            punto_venta_id || user?.punto_venta_id || null, 
+            ubicacion_id || user?.ubicacion_id || null
         );
         await updateParticipacion(id, aciertos, gano);
+
+        // Save individual answers for training reports
+        if (respuestas && Array.isArray(respuestas)) {
+            const { saveRespuestaParticipante } = await import('@/models/Juego');
+            for (const r of respuestas) {
+                await saveRespuestaParticipante(
+                    id,
+                    r.pregunta_id,
+                    r.respuesta_id, // can be null if timed out
+                    r.es_correcta
+                );
+            }
+        }
 
         return NextResponse.json({ success: true, id });
     } catch (error) {

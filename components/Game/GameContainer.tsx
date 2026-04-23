@@ -15,11 +15,22 @@ interface GameContainerProps {
     marcaBayerId: string;
     totalParticipants: number;
     marcaLogoUrl?: string;
+    puntoVentaId?: string;
+    ubicacionId?: string;
 }
 
 type GameState = 'READY' | 'SPINNING' | 'QUESTION' | 'FEEDBACK' | 'FINISHED' | 'NEXT_PARTICIPANT';
 
-export default function GameContainer({ preguntas, paisId, paisNombre, marcaBayerId, totalParticipants, marcaLogoUrl }: GameContainerProps) {
+export default function GameContainer({ 
+    preguntas, 
+    paisId, 
+    paisNombre, 
+    marcaBayerId, 
+    totalParticipants, 
+    marcaLogoUrl,
+    puntoVentaId,
+    ubicacionId 
+}: GameContainerProps) {
     const [gameState, setGameState] = useState<GameState>('READY');
     const [currentParticipant, setCurrentParticipant] = useState(1);
     const [currentRound, setCurrentRound] = useState(1);
@@ -27,6 +38,9 @@ export default function GameContainer({ preguntas, paisId, paisNombre, marcaBaye
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(15);
     const [shuffledQuestions, setShuffledQuestions] = useState<Pregunta[]>([]);
+    const [userAnswers, setUserAnswers] = useState<{pregunta_id: number, respuesta_id: number | null, es_correcta: boolean}[]>([]);
+    
+    const selectedQuestion = shuffledQuestions[currentQuestionIndex];
 
     // Initialize questions on mount or when participant changes
     const [results, setResults] = useState<{ participant: number; score: number; gano: boolean }[]>([]);
@@ -89,6 +103,14 @@ export default function GameContainer({ preguntas, paisId, paisNombre, marcaBaye
             });
         }
 
+        if (selectedQuestion) {
+            setUserAnswers(prev => [...prev, {
+                pregunta_id: selectedQuestion.id,
+                respuesta_id: respuesta.id,
+                es_correcta: respuesta.es_correcta
+            }]);
+        }
+
         setTimeout(() => {
             nextRound();
         }, 2000);
@@ -96,6 +118,15 @@ export default function GameContainer({ preguntas, paisId, paisNombre, marcaBaye
 
     const handleTimeOut = () => {
         setGameState('FEEDBACK');
+        
+        if (selectedQuestion) {
+            setUserAnswers(prev => [...prev, {
+                pregunta_id: selectedQuestion.id,
+                respuesta_id: null,
+                es_correcta: false
+            }]);
+        }
+
         setTimeout(() => {
             nextRound();
         }, 2000);
@@ -115,9 +146,15 @@ export default function GameContainer({ preguntas, paisId, paisNombre, marcaBaye
                         aciertos: currentScore,
                         gano,
                         marca_bayer_id: marcaBayerId,
-                        numero_participante: currentParticipant
+                        numero_participante: currentParticipant,
+                        punto_venta_id: puntoVentaId,
+                        ubicacion_id: ubicacionId,
+                        respuestas: userAnswers
                     }),
                 });
+                
+                // Clear answers for next participant
+                setUserAnswers([]);
             } catch (e) {
                 console.error(e);
             }

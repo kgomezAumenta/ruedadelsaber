@@ -8,10 +8,10 @@ export default async function GamePage({
     searchParams
 }: {
     params: Promise<{ paisId: string; marcaBayerId: string }>;
-    searchParams: Promise<{ participantes?: string }>;
+    searchParams: Promise<{ participantes?: string; punto_venta?: string; ubicacion?: string }>;
 }) {
     const { paisId: paisIdStr, marcaBayerId: marcaBayerIdStr } = await params;
-    const { participantes } = await searchParams;
+    const { participantes, punto_venta, ubicacion } = await searchParams;
 
     const paisId = parseInt(paisIdStr);
     const marcaBayerId = parseInt(marcaBayerIdStr);
@@ -37,6 +37,8 @@ export default async function GamePage({
                 marcaBayerId={marcaBayerIdStr}
                 totalParticipants={totalParticipants}
                 marcaLogoUrl={marca?.logo_url}
+                puntoVentaId={punto_venta}
+                ubicacionId={ubicacion}
             />
         </div>
     );
